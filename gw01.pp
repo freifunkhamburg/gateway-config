@@ -20,7 +20,7 @@ ffnord::mesh { 'mesh_ffhh':
       fastd_port   => 10000,
       fastd_peers_git => 'git@git.hamburg.freifunk.net:fastdkeys',
 
-      dhcp_ranges => [ '10.112.18.2 10.112.25.254'
+      dhcp_ranges => [ '10.112.2.2 10.112.9.254'
                      ],
       dns_servers => [ '10.112.1.1'
                      ],
