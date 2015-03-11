@@ -2,7 +2,18 @@ class { 'ffnord::params':
   router_id => "10.112.1.11", # The id of this router, probably the ipv4 address
                               # of the mesh device of the providing community
   icvpn_as => "49009",        # The as of the providing community
-  wan_devices => ['eth0'],     # A array of devices which should be in the wan zo                                                                                       ne
+  wan_devices => ['eth0'],     # A array of devices which should be in the wan zone
+  
+  conntrack_max => 131072,
+  conntrack_tcp_timeout => 3600,
+  conntrack_udp_timeout => 65,
+
+  wmem_default => 131071,
+  wmem_max     => 229376,
+  rmem_default => 131071,
+  rmem_max     => 229376,
+
+  max_backlog  => 1000,
 }
 
 ffnord::mesh { 'mesh_ffhh':
@@ -10,6 +21,7 @@ ffnord::mesh { 'mesh_ffhh':
       mesh_code    => "ffhh",
       mesh_as      => 49009,
       mesh_mac     => "de:ad:be:ef:01:01",
+      vpn_mac      => "de:ad:be:ff:01:01",
       mesh_ipv6    => "2a03:2267::202/64",
       mesh_ipv4    => "10.112.1.11/18",
       mesh_mtu     => "1406",
@@ -54,7 +66,6 @@ ffnord::icvpn::setup { 'hamburg01':
     tinc_keyfile       => "/root/tinc_rsa_key.priv"
 }
 
-
 class {
   'ffnord::uplink::ip':
     nat_network => '185.66.193.61/32',
@@ -66,15 +77,22 @@ ffnord::uplink::tunnel {
       remote_public_ip => "185.66.195.1",
       local_ipv4 => "100.64.0.161/31",
       remote_ip => "100.64.0.160",
+      tunnel_mtu => "1400",
       remote_as => "201701";
     'ffrldus':
       local_public_ip => "80.252.100.115",
       remote_public_ip => "185.66.193.1",
       local_ipv4 => "100.64.0.163/31",
       remote_ip => "100.64.0.162",
+      tunnel_mtu => "1400",
       remote_as => "201701";
 }
 
 class { 'ffnord::alfred': master => false }
 
 class { 'ffnord::etckeeper': }
+
+class {
+  'ffnord::monitor::zabbix':
+    zabbixserver => "80.252.106.17";
+}
