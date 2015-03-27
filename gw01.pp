@@ -8,12 +8,12 @@ class { 'ffnord::params':
   conntrack_tcp_timeout => 3600,
   conntrack_udp_timeout => 65,
 
-  wmem_default => 131071,
-  wmem_max     => 229376,
-  rmem_default => 131071,
-  rmem_max     => 229376,
+  wmem_default => 1572864,
+  wmem_max     => 1572864,
+  rmem_default => 1572864,
+  rmem_max     => 1572864,
 
-  max_backlog  => 1000,
+  max_backlog  => 5000,
 }
 
 ffnord::mesh { 'mesh_ffhh':
@@ -38,9 +38,26 @@ ffnord::mesh { 'mesh_ffhh':
                      ],
 }
 
-class {
-  'ffnord::monitor::munin':
-    host => '78.47.49.236'
+ffnord::mesh { 'mesh_helgo':
+      mesh_name    => "Freifunk Helgoland",
+      mesh_code    => "helgo",
+      mesh_as      => 65189,
+      mesh_mac     => "de:ad:aa:ef:01:01",
+      vpn_mac      => "de:ad:ab:ef:01:01",
+      mesh_ipv6    => "2a03:2267:4e16:01ad::101/64",
+      mesh_ipv4    => "10.189.1.1/18",
+      mesh_mtu     => "1406",
+      range_ipv4   => "10.189.0.0/18",
+      mesh_peerings => "/root/mesh_peerings_helgo.yaml",
+
+      fastd_secret => "/root/fastd_secret_helgo.key",
+      fastd_port   => 10100,
+      fastd_peers_git => 'git@git.hamburg.freifunk.net:helgokeys',
+
+      dhcp_ranges => [ '10.189.10.2 10.189.17.254'
+                     ],
+      dns_servers => [ '10.112.1.1'
+                     ],
 }
 
 ffnord::dhcpd::static {
@@ -49,8 +66,8 @@ ffnord::dhcpd::static {
 
 ffnord::uplink6::bgp {
     'suede0':
-      local_ipv6 => "fd2a:322:6700:cc00::2",
-      remote_ipv6 => "fd2a:322:6700:cc00::1",
+      local_ipv6 => "2a03:2267:ffff:0c00::2",
+      remote_ipv6 => "2a03:2267:ffff:0c00::1",
       remote_as => "49009",
       uplink_interface => "eth1";
 }
@@ -61,7 +78,7 @@ ffnord::uplink6::interface {
 ffnord::icvpn::setup { 'hamburg01':
     icvpn_as => 49009,
     icvpn_ipv4_address => "10.207.0.61",
-    icvpn_ipv6_address => "fec0::a:cf:0:31",
+    icvpn_ipv6_address => "fec0::a:cf:0:3d",
     icvpn_exclude_peerings => [hamburg],
     tinc_keyfile       => "/root/tinc_rsa_key.priv"
 }
