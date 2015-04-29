@@ -1,15 +1,26 @@
 class { 'ffnord::params':
-  router_id => "10.112.1.3", # The id of this router, probably the ipv4 address
-                              # of the mesh device of the providing community
-  icvpn_as => "65112",        # The as of the providing community
-  wan_devices => ['eth0'],     # A array of devices which should be in the wan zone
+  router_id => "10.112.1.3",
+  icvpn_as => "49009",
+  wan_devices => ['eth0'],
+
+  conntrack_max => 131072,
+  conntrack_tcp_timeout => 3600,
+  conntrack_udp_timeout => 600,
+
+  wmem_default => 83886080,
+  wmem_max     => 83886080,
+  rmem_default => 83886080,
+  rmem_max     => 83886080,
+
+  max_backlog  => 1000,
 }
 
 ffnord::mesh { 'mesh_ffhh':
       mesh_name    => "Freifunk Hamburg",
       mesh_code    => "ffhh",
-      mesh_as      => 65112,
+      mesh_as      => 49009,
       mesh_mac     => "de:ad:be:ef:03:03",
+      vpn_mac      => "de:ad:be:ff:03:03",
       mesh_ipv6    => "2a03:2267::301/64",
       mesh_ipv4    => "10.112.1.3/18",
       mesh_mtu     => "1406",
@@ -26,20 +37,16 @@ ffnord::mesh { 'mesh_ffhh':
                      ],
 }
 
-class {
-  'ffnord::monitor::munin':
-    host => '78.47.49.236'
-}
-
 ffnord::dhcpd::static {
   'ffhh': static_git => 'https://github.com/freifunkhamburg/dhcp-static.git';
 }
 
 ffnord::uplink6::bgp {
     'wende0':
-      local_ipv6 => "fd2a:322:6700:bb00::2",
-      remote_ipv6 => "fd2a:322:6700:bb00::1",
-      remote_as => "49009";
+      local_ipv6 => "2a03:2267:ffff:0b00::2",
+      remote_ipv6 => "2a03:2267:ffff:0b00::1",
+      remote_as => "49009",
+      uplink_interface => "eth1";
 }
 ffnord::uplink6::interface {
     'eth1':;
@@ -47,7 +54,7 @@ ffnord::uplink6::interface {
 
 class {
   'ffnord::uplink::ip':
-    nat_network => '185.66.193.1/32',
+    nat_network => '185.66.193.59/32',
     tunnel_network => '100.64.0.0/28',
 }
 ffnord::uplink::tunnel {
@@ -56,17 +63,19 @@ ffnord::uplink::tunnel {
       remote_public_ip => "185.66.195.0",
       local_ipv4 => "100.64.0.3/31",
       remote_ip => "100.64.0.2",
+      tunnel_mtu => "1400",
       remote_as => "201701";
     'ffrlfra':
       local_public_ip => "213.128.138.161",
       remote_public_ip => "195.20.242.196",
       local_ipv4 => "100.64.0.9/31",
       remote_ip => "100.64.0.8",
+      tunnel_mtu => "1400",
       remote_as => "201701";
 }
 
 ffnord::icvpn::setup { 'hamburg03':
-    icvpn_as => 65112,
+    icvpn_as => 49009,
     icvpn_ipv4_address => "10.207.0.63",
     icvpn_ipv6_address => "fec0::a:cf:0:3f",
     icvpn_exclude_peerings => [hamburg],
@@ -76,3 +85,8 @@ ffnord::icvpn::setup { 'hamburg03':
 class { 'ffnord::alfred': master => false }
 
 class { 'ffnord::etckeeper': }
+
+class {
+  'ffnord::monitor::zabbix':
+    zabbixserver => "80.252.106.17";
+}
