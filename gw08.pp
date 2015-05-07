@@ -6,14 +6,14 @@ class { 'ffnord::params':
   
   conntrack_max => 131072,
   conntrack_tcp_timeout => 3600,
-  conntrack_udp_timeout => 65,
+  conntrack_udp_timeout => 600,
 
-  wmem_default => 1572864,
-  wmem_max     => 1572864,
-  rmem_default => 1572864,
-  rmem_max     => 1572864,
+  wmem_default => 83886080
+  wmem_max     => 83886080
+  rmem_default => 83886080,
+  rmem_max     => 83886080,
 
-  max_backlog  => 5000,
+  max_backlog  => 1000,
 }
 
 ffnord::mesh { 'mesh_ffhh':
@@ -41,7 +41,6 @@ ffnord::mesh { 'mesh_ffhh':
 ffnord::dhcpd::static {
   'ffhh': static_git => 'https://github.com/freifunkhamburg/dhcp-static.git';
 }
-
 
 class {
   'ffnord::uplink::ip':
